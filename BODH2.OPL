@@ -14,7 +14,6 @@ digits$="0123456789ABCDEF"
 bodh$="BODH"
 bodh%(1)=2 :bodh%(2)=8 :bodh%(3)=10 :bodh%(4)=16
 
-
 rem read & save num & caps status
 kbflags%=peekb($7b)
 kbstat%=1+(kbflags% and $01)+(kbflags% and $40)/32
