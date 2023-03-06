@@ -1,9 +1,9 @@
 # BODH2
 Number converter for the Psion Organiser
 
-allows user to input a number in binary, octal decimal or hex, then convert to another base
+Allows user to input a number in binary, octal decimal or hex, then convert to another base
 
-used floats to increase max number
-new user interface
+Used floats to increase max number.
+Created a new user interface.
 
-hopefully is now compatible with 2 line organiser, but not tested
+Hopefully it's now compatible with a 2 line organiser, but that's untested.
