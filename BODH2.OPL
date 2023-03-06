@@ -1,14 +1,19 @@
-bodh2:
+BODH2:
 rem BODH Binary, Octal, Decimal, Hex Converter
+rem when run, key letter B,O,D or H to choose base
+rem enter a number & choose a new base
+rem press a key to choose another new base
+rem press mode to input a new number or On/Clr to exit
 local kbflags%,kbstat%
 local base1%,in$(16)
 local base2%,out$(20)
 local dec,dec2,cu
 local cv%,i%,d%,bodh%(4),ci%
 local digits$(16),dig$(1),bodh$(4),g$(1)
-digits$="0123456789abcdef"
-bodh$="bodh"
+digits$="0123456789ABCDEF"
+bodh$="BODH"
 bodh%(1)=2 :bodh%(2)=8 :bodh%(3)=10 :bodh%(4)=16
+
 
 rem read & save num & caps status
 kbflags%=peekb($7b)
@@ -16,18 +21,19 @@ kbstat%=1+(kbflags% and $01)+(kbflags% and $40)/32
 
 onerr toobig::
 start::
-kstat 4
+kstat 1 :rem set alpha - upper case
 cls
-print "Bin Oct Dec Hex?"
+print "Bin Oct Dec Hex"
 print "In ?:"
-g$=get$
+g$=upper$(get$)
 if asc(g$)=1: goto end:: :endif :rem On/Clr to exit
 i%=loc(bodh$,g$)
 if i%=0 :goto start:: :endif
 base1%=bodh%(i%)
-at 4,2 :print mid$(bodh$,i%,1) 
+at 4,2 :print mid$(bodh$,i%,1)
+kstat 3 :rem numeric - upper case
 at 6,2 :input in$
-in$=lower$(in$)
+in$=upper$(in$)
 if base1%=10
  dec=val(in$)
 else
@@ -50,7 +56,7 @@ dec2=dec :rem store input number
 
 out::
 print "Out ?:";
-g$=get$
+g$=upper$(get$)
 if asc(g$)=1 :goto end:: :rem On/Clr to exit
 elseif asc(g$)=2 :goto start:: :rem Mode for new number
 endif
@@ -85,11 +91,12 @@ endif
 
 print out$
 dec=dec2 :rem reset to input number
+get
 goto out::
 
 toobig::
 cls
-at 1,2
+print "Error:"
 if err=195 :rem integer overflow
  print "Number too big"
 elseif err=252 :rem str to num error
