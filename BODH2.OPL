@@ -1,0 +1,107 @@
+bodh2:
+rem BODH Binary, Octal, Decimal, Hex Converter
+local kbflags%,kbstat%
+local base1%,in$(16)
+local base2%,out$(20)
+local dec,dec2,cu
+local cv%,i%,d%,bodh%(4),ci%
+local digits$(16),dig$(1),bodh$(4),g$(1)
+digits$="0123456789abcdef"
+bodh$="bodh"
+bodh%(1)=2 :bodh%(2)=8 :bodh%(3)=10 :bodh%(4)=16
+
+rem read & save num & caps status
+kbflags%=peekb($7b)
+kbstat%=1+(kbflags% and $01)+(kbflags% and $40)/32
+
+onerr toobig::
+start::
+kstat 4
+cls
+print "Bin Oct Dec Hex?"
+print "In ?:"
+g$=get$
+if asc(g$)=1: goto end:: :endif :rem On/Clr to exit
+i%=loc(bodh$,g$)
+if i%=0 :goto start:: :endif
+base1%=bodh%(i%)
+at 4,2 :print mid$(bodh$,i%,1) 
+at 6,2 :input in$
+in$=lower$(in$)
+if base1%=10
+ dec=val(in$)
+else
+ i%=0 :rem in$ index
+ cu=1 :rem col unit starts at 1
+ dec=0
+ i%=len(in$)
+ while i%>0 :rem convert in$ to decimal number
+  dig$=mid$(in$,i%,1) :rem extract digit starting from least sig
+  d%=loc(digits$,dig$)-1 :rem find digit value
+  if d%>=base1% or d%=-1 :rem digit too big for base, or invalid
+   raise 252 :rem str to num err
+  endif
+  dec=dec+(d%*cu) :rem add (digit value * col unit)
+  i%=i%-1
+  cu=cu*base1% :rem next column unit
+ endwh
+endif
+dec2=dec :rem store input number
+
+out::
+print "Out ?:";
+g$=get$
+if asc(g$)=1 :goto end:: :rem On/Clr to exit
+elseif asc(g$)=2 :goto start:: :rem Mode for new number
+endif
+i%=loc(bodh$,g$)
+if i%=0 :print chr$(13) :goto out:: :endif
+base2%=bodh%(i%)
+print chr$(8)+chr$(8)+mid$(bodh$,i%,1)+":";
+
+if base2%=10
+ out$=gen$(dec,10) :rem will fill with *** if doesn't fit
+else
+ out$=""
+ cu=1 :rem column unit
+ ci%=1 :rem column index: only used for gaps in binary out$
+ while cu<=dec :rem find num of cols+1 for number
+  cu=cu*base2%
+  ci%=ci%+1
+ endwh
+ 
+ while cu>1
+  cu=cu/base2% :rem decrease column unit
+  ci%=ci%-1
+  cv%=int(dec/cu) :rem column value
+  dig$=mid$(digits$,cv%+1,1) :rem digit for that value
+  if len(out$)>0 and base2%=2 and ci%/4=flt(ci%)/4
+   out$=out$+" " :rem insert gap every 4 binary digits from LSB
+  endif
+  out$=out$+dig$ :rem put digit at end of out$
+  dec=dec-(cv%*cu) :rem subtract value from number
+ endwh
+endif
+
+print out$
+dec=dec2 :rem reset to input number
+goto out::
+
+toobig::
+cls
+at 1,2
+if err=195 :rem integer overflow
+ print "Number too big"
+elseif err=252 :rem str to num error
+ print "bad character"
+elseif err=220 :rem string too long
+ print "too many digits"
+else
+ onerr off
+ raise err
+endif
+get
+goto start::
+
+end::
+kstat kbstat%
